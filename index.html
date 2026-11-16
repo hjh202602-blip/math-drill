@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>암산랩</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f3; --bg2:#efede8; --card:#ffffff; --ink:#18181b; --ink2:#3f3f46; --muted:#71717a; --line:#e4e2dc;
+  --accent:#3b5bfd; --accent2:#2541d6; --accent-ink:#ffffff; --accent-soft:#eaeeff;
+  --ok:#16884a; --ok-soft:#e3f5ea; --bad:#d23b2f; --bad-soft:#fdecea;
+  --lv1:#16884a; --lv2:#d68a00; --lv3:#d23b2f;
+  --shadow:0 1px 2px rgba(20,20,30,.04),0 8px 24px rgba(20,20,30,.06);
+  --radius:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#111114; --bg2:#17171b; --card:#1c1c21; --ink:#f1f1f4; --ink2:#c9c9d1; --muted:#9696a0; --line:#2c2c33;
+    --accent:#7b93ff; --accent2:#9aadff; --accent-ink:#0b0b10; --accent-soft:#22284a;
+    --ok:#46c980; --ok-soft:#14301f; --bad:#ff6d61; --bad-soft:#3a1b18;
+    --lv1:#46c980; --lv2:#f2b53c; --lv3:#ff6d61;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;}
+}
+:root[data-theme="dark"]{--bg:#111114; --bg2:#17171b; --card:#1c1c21; --ink:#f1f1f4; --ink2:#c9c9d1; --muted:#9696a0; --line:#2c2c33;
+    --accent:#7b93ff; --accent2:#9aadff; --accent-ink:#0b0b10; --accent-soft:#22284a;
+    --ok:#46c980; --ok-soft:#14301f; --bad:#ff6d61; --bad-soft:#3a1b18;
+    --lv1:#46c980; --lv2:#f2b53c; --lv3:#ff6d61;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",-apple-system,"Malgun Gothic",sans-serif;
+  line-height:1.6;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.container{max-width:1080px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.hidden{display:none!important}
+
+/* ---------- 상단 내비 ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav .container{display:flex;align-items:center;gap:24px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.15rem;letter-spacing:-.02em;cursor:pointer}
+.logo-mark{width:32px;height:32px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:1rem;font-weight:900}
+.nav-links{display:flex;gap:22px;margin-left:auto;font-size:.95rem;color:var(--ink2)}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{padding:9px 18px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:700;font-size:.9rem;border:0;cursor:pointer}
+@media (max-width:640px){.nav-links{display:none}.nav-cta{margin-left:auto}}
+
+/* ---------- 히어로 ---------- */
+.hero{padding:72px 0 64px}
+.hero .container{display:grid;grid-template-columns:1.15fr 1fr;gap:48px;align-items:center}
+@media (max-width:860px){.hero .container{grid-template-columns:1fr}.hero{padding:44px 0 40px}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.82rem}
+.hero h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.18;letter-spacing:-.035em;margin:18px 0 16px;font-weight:900}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p.lead{font-size:1.1rem;color:var(--ink2);margin:0 0 28px;max-width:30em}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:12px 20px;cursor:pointer;font-size:.98rem;font-weight:600;transition:transform .12s,border-color .12s,background .12s}
+.btn:hover{border-color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn.lg{padding:15px 26px;font-size:1.05rem;border-radius:14px}
+.stats{display:flex;gap:28px;margin-top:36px;flex-wrap:wrap}
+.stats b{display:block;font-size:1.6rem;font-weight:900;letter-spacing:-.02em}
+.stats span{color:var(--muted);font-size:.88rem}
+
+.preview{position:relative;min-height:300px}
+.pv-card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:26px 26px 22px}
+.pv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;font-size:.85rem;color:var(--muted)}
+.pv-q{font-size:2.1rem;font-weight:500;text-align:center;padding:18px 0 22px;min-height:110px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;transition:opacity .3s}
+.pv-in{border:1px dashed var(--line);border-radius:12px;padding:12px;text-align:center;color:var(--muted);font-size:1rem}
+.pv-float{position:absolute;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:14px;padding:10px 14px;font-weight:700;font-size:.95rem}
+.pv-float.a{top:-18px;right:-10px;color:var(--ok)}
+.pv-float.b{bottom:-16px;left:-14px;color:var(--accent)}
+@media (max-width:860px){.pv-float{display:none}}
+
+/* ---------- 섹션 ---------- */
+section.block{padding:64px 0;border-top:1px solid var(--line)}
+section.block.alt{background:var(--bg2)}
+.sec-head{margin-bottom:32px}
+.sec-head .kicker{color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:.04em}
+.sec-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);margin:6px 0 8px;letter-spacing:-.03em;font-weight:900;line-height:1.25}
+.sec-head p{color:var(--muted);margin:0}
+
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.step-title{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;margin-bottom:16px}
+.step-no{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:.8rem;font-weight:900}
+.group-label{font-size:.82rem;color:var(--muted);font-weight:700;margin:4px 0 10px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.cat{text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .12s,transform .12s}
+.cat:hover{border-color:var(--accent);transform:translateY(-1px)}
+.cat .ic{width:40px;height:40px;border-radius:10px;background:var(--bg2);display:grid;place-items:center;font-weight:900;font-size:1.05rem;margin-bottom:10px;font-family:"Noto Serif",serif}
+.cat b{display:block;font-size:1rem}
+.cat small{color:var(--muted);font-size:.8rem;line-height:1.4;display:block;margin-top:2px}
+.cat.on{border-color:var(--accent);background:var(--accent-soft)}
+.cat.on .ic{background:var(--accent);color:var(--accent-ink)}
+
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.levels{grid-template-columns:1fr}}
+.lv{position:relative;text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:16px 16px 14px;cursor:pointer;transition:border-color .12s}
+.lv:hover{border-color:var(--accent)}
+.lv.on{border-color:var(--accent);background:var(--accent-soft)}
+.lv-badge{display:inline-block;font-weight:900;font-size:.85rem;padding:2px 10px;border-radius:999px;color:#fff;margin-bottom:10px}
+.lv-badge.l0{background:var(--lv1)}.lv-badge.l1{background:var(--lv2)}.lv-badge.l2{background:var(--lv3)}
+.lv .crit{font-size:.95rem;font-weight:500;line-height:1.5}
+.lv .ex{font-size:.85rem;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.lv .check{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:.75rem;color:transparent}
+.lv.on .check{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.seg{display:inline-flex;background:var(--bg2);border-radius:12px;padding:4px;gap:4px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--ink2);padding:9px 18px;border-radius:9px;cursor:pointer;font-weight:600;font-size:.95rem}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+.summary{position:sticky;bottom:16px;z-index:10;margin-top:20px;background:var(--ink);color:var(--bg);border-radius:18px;padding:14px 14px 14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.summary .s-txt{flex:1;min-width:0}
+.summary small{opacity:.65;font-size:.8rem;display:block}
+.summary b{font-size:1.05rem}
+.summary .btn.primary{flex-shrink:0}
+
+/* 기준표 */
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:.92rem}
+th,td{padding:14px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+thead th{background:var(--bg2);font-size:.85rem;color:var(--ink2)}
+td.name{font-weight:700;white-space:nowrap}
+td .ex{display:block;color:var(--muted);font-size:.82rem;margin-top:4px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* 사용법 */
+.guide{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.g-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.g-card h3{margin:0 0 6px;font-size:1rem}
+.g-card p{margin:0;color:var(--muted);font-size:.9rem}
+kbd{font-family:inherit;background:var(--bg2);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 7px;font-size:.85em;color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:.85rem}
+footer .container{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---------- 풀이 화면 ---------- */
+#quiz,#result{padding:32px 0 80px}
+.q-wrap{max-width:720px;margin:0 auto}
+.q-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.tag{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 13px;font-size:.85rem;font-weight:700}
+.q-bar .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.progress{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
+.progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.q-card{background:var(--card);border:1.5px solid var(--line);border-radius:24px;padding:40px 24px 30px;text-align:center;box-shadow:var(--shadow);transition:background .2s,border-color .2s}
+.q-card.ok{border-color:var(--ok);background:var(--ok-soft)}
+.q-card.bad{border-color:var(--bad);background:var(--bad-soft)}
+.qno{color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.05em}
+.problem{font-size:clamp(1.7rem,6vw,2.6rem);font-weight:500;font-variant-numeric:tabular-nums;line-height:1.9;margin:14px 0 6px;word-break:keep-all}
+.problem i,.answer i,.pv-q i,.wrong i,td i{font-family:"Noto Serif","Times New Roman",serif;font-style:italic}
+.ask{color:var(--muted);font-size:.92rem}
+.fb{min-height:1.8em;margin-top:16px;font-weight:700;font-size:1.05rem}
+.fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+.answer{font-size:1.4rem;font-weight:500}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.72em;margin:0 .14em;line-height:1.2}
+.fr>span:first-child{border-bottom:2px solid currentColor;padding:0 .28em 2px}
+.fr>span:last-child{padding:2px .28em 0}
+.sq{display:inline-flex;align-items:stretch;vertical-align:-.12em;margin:0 .04em;line-height:1}
+.sq svg{width:.5em;flex-shrink:0;overflow:visible;position:relative;top:.035em}
+.sq path{fill:none;stroke:currentColor;stroke-width:.07em;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.sq .rad{border-top:.07em solid currentColor;padding:.12em .08em 0 .06em;line-height:1}
+.inrow{display:flex;gap:10px;margin-top:18px}
+.inrow input{flex:1;min-width:0;font-size:1.45rem;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+  font-family:inherit;text-align:center;font-variant-numeric:tabular-nums}
+.inrow input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.inrow .btn{min-width:92px}
+.keys{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.key{min-width:56px;padding:10px 14px;font-size:1.15rem;border-radius:12px;border:1px solid var(--line);border-bottom-width:3px;background:var(--card);color:var(--ink);cursor:pointer;font-family:"Noto Serif",serif}
+.key:active{transform:translateY(1px);border-bottom-width:2px}
+.hint{color:var(--muted);font-size:.85rem;margin-top:12px;text-align:center}
+.q-foot{display:flex;justify-content:center;margin-top:18px}
+.linkbtn{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+
+/* 결과 */
+.r-hero{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:36px 24px;text-align:center;box-shadow:var(--shadow)}
+.r-msg{font-size:1.2rem;font-weight:700;margin-top:8px}
+.score{font-size:clamp(2.8rem,9vw,4rem);font-weight:900;letter-spacing:-.03em;margin:4px 0;font-variant-numeric:tabular-nums}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 28px}
+.grid3>div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}
+.grid3 small{display:block;color:var(--muted);font-size:.82rem}
+.grid3 b{font-size:1.35rem;font-variant-numeric:tabular-nums}
+.r-sub{font-size:1.1rem;font-weight:700;margin:0 0 12px}
+.wrong{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center}
+.wrong .p{font-size:1.25rem;flex:1 1 240px;line-height:1.9}
+.wrong .m{color:var(--bad);font-size:.92rem} .wrong .c{color:var(--ok);font-size:.92rem;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+/* 풀이 방식 · 객관식 */
+.cats.modes{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));margin-bottom:0}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+@media (max-width:520px){.choices{grid-template-columns:1fr}}
+.choice{display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:12px 18px;
+  cursor:pointer;color:var(--ink);font-size:1.35rem;min-height:74px;transition:border-color .12s,transform .12s,background .15s}
+.choice:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.choice:disabled{cursor:default}
+.choice .cn{width:28px;height:28px;border-radius:8px;background:var(--bg2);display:grid;place-items:center;font-size:.85rem;font-weight:700;flex-shrink:0;color:var(--ink2)}
+.choice .cv{flex:1;text-align:center;line-height:1.9;font-variant-numeric:tabular-nums}
+.choice i{font-family:"Noto Serif","Times New Roman",serif;font-style:italic}
+.choice.right{border-color:var(--ok);background:var(--ok-soft)} .choice.right .cn{background:var(--ok);color:#fff}
+.choice.picked{border-color:var(--bad);background:var(--bad-soft)} .choice.picked .cn{background:var(--bad);color:#fff}
+.choice.dim{opacity:.5}
+
+/* 도형 그림 */
+.fig{display:block;width:min(100%,360px);height:auto;margin:0 auto}
+.fig .shape{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
+.fig .dash{stroke:var(--ink2);stroke-width:1.5;stroke-dasharray:5 4}
+.fig .ra{fill:none;stroke:var(--ink2);stroke-width:1.3}
+.fig .dim{stroke:var(--ink2);stroke-width:1.2}
+.fig .tick{stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
+.fig .ext{stroke:var(--muted);stroke-width:.9}
+.fig text{fill:var(--ink);font-size:14px;font-weight:600;font-family:"Noto Sans KR",sans-serif}
+.fig .sm text{font-size:12px}
+.fig-cap{font-size:.9rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.rv-q .fig{width:min(100%,250px);margin:0}
+.rv-q .fig-cap{font-size:.8rem}
+.pv-q .fig{width:min(100%,260px)}
+.pv-q{flex-direction:column}
+
+/* 풀이 기록 */
+.muted{color:var(--muted)}
+.rv-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.rv{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.rv.bad{border-left-color:var(--bad)}
+.rv-side{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;width:30px}
+.rv-no{font-size:.8rem;color:var(--muted);font-weight:700}
+.rv-mark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:.9rem;color:#fff;background:var(--ok)}
+.rv.bad .rv-mark{background:var(--bad)}
+.rv-body{flex:1;min-width:0}
+.rv-top{margin-bottom:2px}
+.mtag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--ink2);background:var(--bg2);border-radius:6px;padding:1px 8px}
+.rv-q{font-size:1.3rem;line-height:1.9}
+.rv-q i,.rv-ans i,.rv-opt i{font-family:"Noto Serif","Times New Roman",serif;font-style:italic}
+.rv-opts{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.rv-opt{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:2px 10px;font-size:1rem;line-height:1.8;color:var(--muted)}
+.rv-opt em{font-style:normal;font-size:.72rem;font-weight:700}
+.rv-opt.right{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.rv-opt.picked{border-color:var(--bad);color:var(--bad);background:var(--bad-soft);text-decoration:line-through}
+.rv-ans{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:.88rem;color:var(--muted);align-items:center}
+.rv-ans b{font-size:1.1rem;font-weight:600;margin-left:4px;line-height:1.9}
+.rv-ans b.g{color:var(--ok)} .rv-ans b.r{color:var(--bad)}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container">
+    <a class="logo" id="logo"><span class="logo-mark">∑</span>암산랩</a>
+    <nav class="nav-links">
+      <a href="#practice">연습하기</a>
+      <a href="#levels-sec">난이도 기준</a>
+      <a href="#guide">입력 방법</a>
+    </nav>
+    <button class="nav-cta" id="navCta">바로 시작</button>
+  </div>
+</header>
+
+<main id="home">
+  <section class="hero">
+    <div class="container">
+      <div>
+        <span class="eyebrow">● 무한 생성 암산 문제</span>
+        <h1>머리로 푸는 계산,<br><em>단계별로</em> 빨라지게.</h1>
+        <p class="lead">정수부터 분수, 소수, 루트, 허수, 절댓값, 다항식과 방정식, 도형의 넓이까지. 난이도마다 <b>새로운 개념이 하나씩</b> 더해지도록 짜인 문제로 연습하세요.</p>
+        <div class="hero-btns">
+          <a class="btn primary lg" href="#practice">연습 시작하기 →</a>
+          <a class="btn lg" href="#levels-sec">난이도 기준 보기</a>
+        </div>
+        <div class="stats">
+          <div><b>9</b><span>연습 영역</span></div>
+          <div><b>27</b><span>난이도 단계</span></div>
+          <div><b>∞</b><span>매번 새 문제</span></div>
+        </div>
+      </div>
+      <div class="preview" aria-hidden="true">
+        <div class="pv-card">
+          <div class="pv-top"><span class="tag" id="pvTag">정수 · 상</span><span>3 / 10</span></div>
+          <div class="pv-q" id="pvQ"></div>
+          <div class="pv-in">답을 입력하세요</div>
+        </div>
+        <div class="pv-float a">✓ 정답!</div>
+        <div class="pv-float b">평균 4.2초</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="practice">
+    <div class="container">
+      <div class="sec-head">
+        <div class="kicker">PRACTICE</div>
+        <h2>무엇을 연습할까요?</h2>
+        <p>항목과 난이도, 문제 수를 고르면 바로 시작합니다.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-no">1</span>항목 선택</div>
+        <div class="group-label">사칙연산</div>
+        <div class="cats" id="cats-arith"></div>
+        <div class="group-label">식</div>
+        <div class="cats" id="cats-expr"></div>
+        <div class="group-label">도형</div>
+        <div class="cats" id="cats-geo" style="margin-bottom:0"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-no">2</span>난이도 선택 <span style="color:var(--muted);font-weight:500;font-size:.88rem">— <span id="lvCatName"></span></span></div>
+        <div class="levels" id="levels"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-no">3</span>풀이 방식</div>
+        <div class="cats modes" id="modes"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-no">4</span>문제 수</div>
+        <div class="seg" id="counts"></div>
+      </div>
+
+      <div class="summary">
+        <div class="s-txt"><small>선택한 연습</small><b id="sumTxt"></b></div>
+        <button class="btn primary lg" id="startBtn">시작 →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="levels-sec">
+    <div class="container"></div>
+  </section>
+
+  <section class="block alt" id="guide">
+    <div class="container">
+      <div class="sec-head">
+        <div class="kicker">HOW TO</div>
+        <h2>답은 이렇게 입력하세요</h2>
+        <p>화면 아래 기호 버튼을 눌러도 되고, 키보드로 직접 입력해도 됩니다.</p>
+      </div>
+      <div class="guide">
+        <div class="g-card"><h3>분수</h3><p><kbd>3/4</kbd>, <kbd>-5/2</kbd> 처럼 입력. 약분하지 않아도 값이 같으면 정답이에요.</p></div>
+        <div class="g-card"><h3>루트</h3><p><kbd>2√3</kbd> 꼴로 입력. √ 는 키보드 <kbd>r</kbd> 로도 입력돼요. 근호 안은 끝까지 간단히!</p></div>
+        <div class="g-card"><h3>허수</h3><p><kbd>3-2i</kbd>, <kbd>-i</kbd> 처럼 입력. 항의 순서는 바뀌어도 괜찮아요.</p></div>
+        <div class="g-card"><h3>다항식 · 방정식</h3><p>다항식은 <kbd>-2x+9</kbd>, 방정식은 <kbd>3</kbd> 또는 <kbd>x=3</kbd>.</p></div>
+        <div class="g-card"><h3>객관식</h3><p>보기 4개 중 하나를 누르거나 숫자 키 <kbd>1</kbd>~<kbd>4</kbd> 로 고르세요. 오답 보기는 부호·자릿수 같은 흔한 실수로 만들어져요.</p></div>
+        <div class="g-card"><h3>단축키</h3><p><kbd>Enter</kbd> 로 채점하면 정답을 잠깐 보여 준 뒤 자동으로 다음 문제로 넘어가요. 다 풀고 나면 전체 풀이 기록을 볼 수 있어요.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container"><span>© 암산랩 · 매번 새로 만들어지는 암산 문제</span><span>모든 문제는 브라우저에서 생성됩니다</span></div>
+  </footer>
+</main>
+
+<!-- ===== 풀이 ===== -->
+<main id="quiz" class="hidden">
+  <div class="container"><div class="q-wrap">
+    <div class="q-bar">
+      <span class="tag" id="qTag"></span>
+      <span class="sp"></span>
+      <span class="pill" id="qStat"></span>
+      <span class="pill">⏱ <span id="qTime">0:00</span></span>
+      <button class="btn" id="quitBtn" style="padding:7px 14px;font-size:.88rem">그만하기</button>
+    </div>
+    <div class="progress"><div id="qProg"></div></div>
+    <div class="q-card" id="qCard">
+      <div class="qno" id="qNo"></div>
+      <div class="problem" id="qText"></div>
+      <div class="ask" id="qAsk"></div>
+      <div class="fb" id="qFb"></div>
+    </div>
+    <div id="qChoiceArea" class="hidden">
+      <div class="choices" id="qChoices"></div>
+      <div class="hint">보기를 누르거나 숫자 키 <kbd>1</kbd>~<kbd>4</kbd> 로 고르세요</div>
+    </div>
+    <div id="qInputArea">
+    <div class="inrow">
+      <input id="qIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="답 입력 후 Enter">
+      <button class="btn primary" id="okBtn">확인</button>
+    </div>
+    <div class="keys" id="qKeys"></div>
+    <div class="hint" id="qHint"></div>
+    </div>
+    <div class="q-foot"><button class="linkbtn" id="skipBtn">모르겠어요 · 건너뛰기</button></div>
+  </div></div>
+</main>
+
+<!-- ===== 결과 ===== -->
+<main id="result" class="hidden">
+  <div class="container"><div class="q-wrap">
+    <div class="r-hero">
+      <span class="tag" id="rTag"></span>
+      <div class="score" id="rScore"></div>
+      <div class="r-msg" id="rMsg"></div>
+    </div>
+    <div class="grid3">
+      <div><small>정답률</small><b id="rRate"></b></div>
+      <div><small>걸린 시간</small><b id="rTime"></b></div>
+      <div><small>문제당 평균</small><b id="rAvg"></b></div>
+    </div>
+    <div class="rv-head">
+      <div><h3 class="r-sub" style="margin:0">풀이 기록</h3><div class="muted" id="rvCount" style="font-size:.88rem"></div></div>
+      <div class="seg" id="rvFilter"><button data-f="all">전체</button><button data-f="bad">틀린 문제</button><button data-f="ok">맞힌 문제</button></div>
+    </div>
+    <div id="rList"></div>
+    <div class="row">
+      <button class="btn primary" id="againBtn">같은 설정으로 다시</button>
+      <button class="btn" id="retryWrongBtn">틀린 문제만 다시</button>
+      <button class="btn" id="homeBtn">처음으로</button>
+    </div>
+  </div></div>
+</main>
+
+<script>
+// ==LOGIC START==
+/* ---------- 기본 도구 ---------- */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const nz=(a,b)=>{let v;do{v=rnd(a,b)}while(v===0);return v};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b)[a,b]=[b,a%b];return a};
+const M='−', X='<i>x</i>';
+
+// 유리수 {n,d}
+const Q=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}};
+const qadd=(a,b)=>Q(a.n*b.d+b.n*a.d,a.d*b.d);
+const qsub=(a,b)=>Q(a.n*b.d-b.n*a.d,a.d*b.d);
+const qmul=(a,b)=>Q(a.n*b.n,a.d*b.d);
+const qdiv=(a,b)=>Q(a.n*b.d,a.d*b.n);
+const qeq=(a,b)=>!!(a&&b&&a.n===b.n&&a.d===b.d);
+
+/* ---------- 표시 ---------- */
+const num=n=>n<0?M+(-n):String(n);
+const par=n=>n<0?`(${num(n)})`:num(n);
+const fracH=q=>q.d===1?num(q.n):`${q.n<0?M:''}<span class="fr"><span>${Math.abs(q.n)}</span><span>${q.d}</span></span>`;
+const frRaw=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`; // 약분하지 않은 분수 표시
+const fracP=q=>q.n<0?`(${fracH(q)})`:fracH(q);
+const fracT=q=>q.d===1?String(q.n):`${q.n}/${q.d}`;
+// 근호: 꺾인 √ 부분(SVG)과 위쪽 가로선(border-top)이 이어지도록 그림
+const sq=n=>`<span class="sq"><svg viewBox="0 0 10 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0.4 12.2 L2.6 10.6 L5.6 20 L10 0"/></svg><span class="rad">${n}</span></span>`;
+const coefH=k=>k===1?'':k===-1?M:num(k);
+const radH=(k,n)=>n===1?num(k):coefH(k)+sq(n);
+const radT=(k,n)=>n===1?String(k):(k===1?'':k===-1?'-':k)+'√'+n;
+const textify=h=>h.replace(/<[^>]+>/g,'').replace(/−/g,'-').replace(/\s/g,'');
+// 복소수 a+bi
+const cH=(a,b)=>{if(b===0)return num(a);const bi=(Math.abs(b)===1?'':Math.abs(b))+'<i>i</i>';if(a===0)return(b<0?M:'')+bi;return num(a)+(b<0?' − ':' + ')+bi};
+// 일차식 ax+b
+const linH=(a,b)=>{if(a===0)return num(b);const t=coefH(a)+X;if(b===0)return t;return t+(b<0?' − ':' + ')+Math.abs(b)};
+const termH=(c,isX,first)=>{const ab=Math.abs(c);const body=isX?(ab===1?'':ab)+X:String(ab);return first?(c<0?M:'')+body:(c<0?' − ':' + ')+body};
+const kpar=(k,p,q)=>`${coefH(k)}(${linH(p,q)})`;
+// 소수
+const dec=(int,k)=>Q(int,10**k);
+const decStr=q=>{let k=0,p=1;while(p%q.d!==0&&k<12){k++;p*=10}let s=String(Math.abs(q.n)*(p/q.d));if(k>0){s=s.padStart(k+1,'0');s=s.slice(0,-k)+'.'+s.slice(-k)}return(q.n<0?M:'')+s};
+// 근호
+const simpRad=n=>{let k=1;for(let f=2;f*f<=n;f++)while(n%(f*f)===0){n/=f*f;k*=f}return[k,n]};
+const isSq=n=>Number.isInteger(Math.sqrt(n));
+
+/* ---------- 입력 해석 ---------- */
+const norm=s=>s.replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/sqrt|루트|r/gi,'√').replace(/X/g,'x').replace(/I/g,'i').replace(/×/g,'*');
+function parseQ(s){
+  const m=s.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:\/(\d+))?$/); if(!m) return null;
+  let n=parseInt(m[2]+(m[3]||''),10), d=10**((m[3]||'').length);
+  if(m[4]){const dd=parseInt(m[4],10); if(!dd) return null; d*=dd}
+  if(m[1]==='-') n=-n; return Q(n,d);
+}
+function parseLin(s,v){ // a·v + b
+  if(!s) return null;
+  const terms=s.match(/[+-]?[^+-]+/g); if(!terms||terms.join('')!==s) return null;
+  let a=Q(0),b=Q(0); const re=new RegExp('^([+-]?)(\\d+(?:\\.\\d+)?(?:\\/\\d+)?)?(\\*?'+v+')?$');
+  for(const t of terms){
+    const m=t.match(re); if(!m||(!m[2]&&!m[3])) return null;
+    let c=m[2]?parseQ(m[2]):Q(1); if(!c) return null; if(m[1]==='-') c=Q(-c.n,c.d);
+    if(m[3]) a=qadd(a,c); else b=qadd(b,c);
+  }
+  return {a,b};
+}
+function parseRad(s){
+  s=s.replace(/[()]/g,'');
+  if(/^[+-]?\d+$/.test(s)) return {k:parseInt(s,10),n:1};
+  const m=s.match(/^([+-]?)(\d*)\*?√(\d+)$/); if(!m) return null;
+  let k=m[2]?parseInt(m[2],10):1; if(m[1]==='-') k=-k;
+  const n=parseInt(m[3],10), [f,r]=simpRad(n);
+  if(r===1) return {k:k*f,n:1};           // √16 → 4
+  return {k,n,raw:f!==1};                  // raw: 근호 안을 덜 간단히 함
+}
+
+/* ---------- 문제 객체 만들기 ---------- */
+// alts(): 객관식 오답 후보 {h: 표시 HTML, t: 비교용 텍스트} — 흔한 실수(부호, ±1, 역수, 자릿수 등) 위주
+const O=(h,t)=>({h,t});
+const mkQ=(q,a)=>({q,ans:fracH(a),text:fracT(a),check:s=>qeq(parseQ(s),a),
+  alts:()=>(a.d===1?[-a.n,a.n+1,a.n-1,a.n+2,a.n-2,a.n+10,a.n-10,a.n*2].map(v=>Q(v))
+    :[Q(-a.n,a.d),qadd(a,Q(1)),qsub(a,Q(1)),a.n?Q(a.d,a.n):Q(1),Q(a.n+1,a.d),Q(a.n-1,a.d),Q(a.n,a.d+1),Q(a.n*2,a.d),Q(a.n,a.d*2)])
+    .map(v=>O(fracH(v),fracT(v)))});
+const mkDec=(q,a)=>({q,ans:decStr(a),text:decStr(a).replace(M,'-'),check:s=>qeq(parseQ(s),a),
+  alts:()=>[qmul(a,Q(10)),qmul(a,Q(1,10)),qadd(a,Q(1,10)),qsub(a,Q(1,10)),qadd(a,Q(1)),qsub(a,Q(1)),qadd(a,Q(1,100)),Q(-a.n,a.d)]
+    .map(v=>O(decStr(v),decStr(v).replace(M,'-')))});
+const mkRad=(q,k,n)=>({q,ans:radH(k,n),text:radT(k,n),check:s=>{const p=parseRad(s);return!!p&&!p.raw&&p.k===k&&p.n===n},
+  alts:()=>{const L=[[k+1,n],[k-1,n],[-k,n],[k+2,n],[k*2,n],[k,n===2?3:2]];if(n>1)L.push([k*k*n,1]);
+    return L.filter(([kk,nn])=>kk!==0||nn===1).map(([kk,nn])=>O(radH(kk,nn),radT(kk,nn)))}});
+const mkC=(q,a,b)=>({q,ans:cH(a,b),text:textify(cH(a,b)),check:s=>{const p=parseLin(s,'i');return!!p&&qeq(p.a,Q(b))&&qeq(p.b,Q(a))},
+  alts:()=>[[a,-b],[-a,b],[b,a],[a+1,b],[a,b+1],[-a,-b],[a-1,b-1],[a,b-1]].map(([x,y])=>O(cH(x,y),textify(cH(x,y))))});
+const mkLin=(q,a,b)=>({q,ans:linH(a,b),text:textify(linH(a,b)),check:s=>{const p=parseLin(s,'x');return!!p&&qeq(p.a,Q(a))&&qeq(p.b,Q(b))},
+  alts:()=>[[a,-b],[-a,b],[a+1,b],[a,b+1],[a-1,b],[a,b-2],[-a,-b],[a,b+2]].filter(([x])=>x!==0).map(([x,y])=>O(linH(x,y),textify(linH(x,y))))});
+const mkEq=(q,x)=>({q,ans:`${X} = ${num(x)}`,text:String(x),check:s=>qeq(parseQ(s.replace(/^x=/,'')),Q(x)),
+  alts:()=>[-x,x+1,x-1,x+2,x-2,x*2,x+3].map(v=>O(`${X} = ${num(v)}`,String(v+0)))});
+// 정답 1개 + 오답 3개를 섞은 4지선다 (문제마다 한 번만 만들어 고정)
+function makeChoices(p){
+  if(p.choices) return p.choices;
+  const seen=new Set([p.text]),w=[];
+  for(const o of p.altsOrdered?p.alts():shuffle(p.alts())){if(w.length>=3)break;if(seen.has(o.t))continue;seen.add(o.t);w.push(o)}
+  return p.choices=shuffle([O(p.ans,p.text),...w]);
+}
+
+/* ---------- 절댓값 ---------- */
+const ab=h=>`|${h}|`;
+const absVal=()=>rnd(0,2)?Q(nz(-30,30)):dec(nz(-99,99),1);   // 정수 또는 소수 한 자리
+const qH=q=>q.d===1?num(q.n):decStr(q);
+const mkNum=(q,a)=>a.d===1?mkQ(q,a):mkDec(q,a);
+
+/* ---------- 도형 그림 (SVG) ---------- */
+const VW=340,VH=240;
+const fig=(inner,cap)=>`<svg class="fig" viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>${cap?`<div class="fig-cap">${cap}</div>`:''}`;
+// 단위 길이 W×H 상자를 그림 영역에 맞추는 배율과 왼쪽 위 좌표
+const fit=(W,H)=>{const s=Math.min(190/W,135/H);return{s,x0:(VW-W*s)/2,y0:(VH-H*s)/2-8}};
+const LN=(x1,y1,x2,y2,c)=>`<line class="${c}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+// 치수선: 변 a→b 바깥쪽(c = 도형 중심의 반대편)에 평행선을 긋고, 양 끝을 빗금으로 표시한 뒤 가운데에 길이를 씀
+function DIM(a,b,t,c,off=14){
+  const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+  let nx=uy,ny=-ux;const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+  if((mx-c[0])*nx+(my-c[1])*ny<0){nx=-nx;ny=-ny}
+  const A=[a[0]+nx*off,a[1]+ny*off],B=[b[0]+nx*off,b[1]+ny*off];
+  const ext=p=>LN(p[0]+nx*3,p[1]+ny*3,p[0]+nx*(off+4),p[1]+ny*(off+4),'ext');
+  const tick=p=>{const tx=(ux+nx)*4.5,ty=(uy+ny)*4.5;return LN(p[0]-tx,p[1]-ty,p[0]+tx,p[1]+ty,'tick')};
+  const side=Math.abs(nx)>0.35,lo=off+(side?7:12);
+  return ext(a)+ext(b)+LN(A[0],A[1],B[0],B[1],'dim')+tick(A)+tick(B)
+    +T(mx+nx*lo,my+ny*lo,t,side?(nx>0?'start':'end'):'middle');
+}
+const P=pts=>`<polygon class="shape" points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>`;
+const T=(x,y,t,a='middle')=>`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${a}" dominant-baseline="middle">${t}</text>`;
+const D=(x1,y1,x2,y2)=>`<line class="dash" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+const RA=(x,y,dx,dy,k=10)=>`<path class="ra" d="M${x+dx*k} ${y} L${x+dx*k} ${y+dy*k} L${x} ${y+dy*k}"/>`; // 직각 표시
+const cm=n=>`${n} cm`;
+const TRIP=[[3,4,5],[4,3,5],[6,8,10],[8,6,10],[5,12,13],[9,12,15],[12,9,15]]; // [밑에서 벗어난 길이, 높이, 빗변]
+// 넓이 문제: miss = 흔한 실수로 나오는 값(÷2 빠뜨림, 빗변을 높이로 씀 등)을 객관식 오답으로 우선 사용
+const mkArea=(q,a,miss=[])=>({q,ans:`${a} cm²`,text:String(a),check:s=>qeq(parseQ(s.replace(/(cm)?²$|cm(\^?2)?$/,'')),Q(a)),altsOrdered:true,
+  alts:()=>[...shuffle(miss.filter(v=>v>0&&v!==a&&Number.isInteger(v))),...shuffle([a+2,a-2,a+4,a*2,a+10,a-5])].filter(v=>v>0&&v!==a).map(v=>O(`${v} cm²`,String(v)))});
+
+/* ---------- 항목 · 난이도 정의 ---------- */
+const CATS={
+  int:{name:'정수',group:'arith',ask:'계산하세요',keys:['−'],hint:'정수로 입력',levels:[
+    {crit:'한 자리 자연수, 연산 1번 (+ − ×), 답은 0 이상',ex:'7 + 5,  9 − 4,  6 × 8',gen(){
+      const op=pick(['+','−','×']);let a=rnd(1,9),b=rnd(1,9);
+      if(op==='−'&&a<b)[a,b]=[b,a];
+      return mkQ(`${a} ${op} ${b}`,Q(op==='+'?a+b:op==='−'?a-b:a*b));}},
+    {crit:'음수가 들어감 + 나눗셈 추가 (연산 1번, 나누어떨어짐)',ex:'(−12) × 3,  45 ÷ (−9)',gen(){
+      const op=pick(['+','−','×','÷']);let a,b,r;
+      if(op==='+'||op==='−'){a=nz(-30,30);b=nz(-30,30)}
+      else if(op==='×'){a=nz(-12,12);b=nz(-9,9)}
+      else{b=nz(-9,9);a=b*nz(-12,12)}
+      if(a>0&&b>0){if(rnd(0,1))a=-a;else b=-b}
+      r=op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:a/b;
+      return mkQ(`${num(a)} ${op} ${par(b)}`,Q(r));}},
+    {crit:'연산 2~3개 섞임 + 괄호 → 연산 순서 (× ÷ 먼저, 괄호 먼저)',ex:'3 + 4 × (−2),  (8 − 3) × 4',gen(){
+      const v=()=>nz(-9,9);let a=v(),b=v(),c=v(),d=v(),q,r;
+      switch(rnd(0,5)){
+        case 0:q=`${num(a)} + ${par(b)} × ${par(c)}`;r=a+b*c;break;
+        case 1:b=c*nz(-6,6);q=`${num(a)} − ${par(b)} ÷ ${par(c)}`;r=a-b/c;break;
+        case 2:q=`(${num(a)} + ${par(b)}) × ${par(c)}`;r=(a+b)*c;break;
+        case 3:q=`${num(a)} × ${par(b)} − ${par(c)} × ${par(d)}`;r=a*b-c*d;break;
+        case 4:{const k=nz(-6,6);a=b+c*k;q=`(${num(a)} − ${par(b)}) ÷ ${par(c)}`;r=k;break}
+        default:q=`${num(a)} × (${num(b)} − ${par(c)}) + ${par(d)}`;r=a*(b-c)+d;
+      }
+      return mkQ(q,Q(r));}},
+  ]},
+  frac:{name:'분수',group:'arith',ask:'계산하세요 (분수는 a/b)',keys:['/','−'],hint:'예: 7/12, −3/4 · 같은 값이면 정답 (기약분수 권장)',levels:[
+    {crit:'분모가 같은 분수의 덧셈·뺄셈',ex:'2/7 + 3/7,  5/9 − 1/9',gen(){
+      const d=rnd(3,12),op=pick(['+','−']);let a,b;
+      do{a=rnd(1,d-1);b=rnd(1,d-1)}while(op==='−'&&a<=b);
+      return mkQ(`${frRaw(a,d)} ${op} ${frRaw(b,d)}`,op==='+'?Q(a+b,d):Q(a-b,d));}},
+    {crit:'분모가 다른 분수의 덧셈·뺄셈 (통분 필요)',ex:'1/3 + 1/4,  5/6 − 2/9',gen(){
+      let d1,d2,a,b;do{d1=rnd(2,10);d2=rnd(2,10)}while(d1===d2||d1%d2===0&&rnd(0,1));
+      a=rnd(1,d1-1);b=rnd(1,d2-1);const op=pick(['+','−']);
+      const x=Q(a,d1),y=Q(b,d2);
+      return mkQ(`${frRaw(a,d1)} ${op} ${frRaw(b,d2)}`,op==='+'?qadd(x,y):qsub(x,y));}},
+    {crit:'음수 분수의 곱셈·나눗셈 (역수 · 약분 · 부호)',ex:'(−2/3) × 9/4,  3/5 ÷ (−6/7)',gen(){
+      const f=()=>{let p,q;do{p=rnd(1,9);q=rnd(2,9)}while(gcd(p,q)!==1);return Q(p,q)};
+      let x=f(),y=f();
+      if(rnd(0,1))x=Q(-x.n,x.d); if(rnd(0,1)||x.n>0)y=Q(-y.n,y.d);
+      const op=pick(['×','÷']);
+      return mkQ(`${fracP(x)} ${op} ${fracP(y)}`,op==='×'?qmul(x,y):qdiv(x,y));}},
+  ]},
+  dec:{name:'소수',group:'arith',ask:'계산하세요',keys:['.','−'],hint:'예: 3.25',levels:[
+    {crit:'소수 첫째 자리끼리 덧셈·뺄셈',ex:'2.3 + 4.8,  7.5 − 3.9',gen(){
+      const op=pick(['+','−']);let a=rnd(11,99),b=rnd(11,99);if(op==='−'&&a<b)[a,b]=[b,a];
+      const x=dec(a,1),y=dec(b,1);
+      return mkDec(`${decStr(x)} ${op} ${decStr(y)}`,op==='+'?qadd(x,y):qsub(x,y));}},
+    {crit:'자릿수가 다른 소수끼리 덧셈·뺄셈, 소수 × 자연수',ex:'3.25 − 1.7,  0.36 × 4',gen(){
+      if(rnd(0,1)){
+        let x=dec(rnd(101,999),2),y=dec(rnd(11,99),1);if(rnd(0,1))[x,y]=[y,x];
+        const op=pick(['+','−']);if(op==='−'&&qsub(x,y).n<0)[x,y]=[y,x];
+        return mkDec(`${decStr(x)} ${op} ${decStr(y)}`,op==='+'?qadd(x,y):qsub(x,y));
+      }
+      const x=rnd(0,1)?dec(rnd(11,99),1):dec(rnd(11,99),2),n=rnd(2,9);
+      return mkDec(`${decStr(x)} × ${n}`,qmul(x,Q(n)));}},
+    {crit:'소수 × 소수, 소수 ÷ 소수 (소수점 위치 옮기기)',ex:'0.6 × 0.4,  1.44 ÷ 0.12',gen(){
+      if(rnd(0,1)){
+        const x=dec(rnd(2,99),1),y=rnd(0,1)?dec(rnd(2,9),1):dec(rnd(2,9),2);
+        return mkDec(`${decStr(x)} × ${decStr(y)}`,qmul(x,y));
+      }
+      const d=rnd(0,1)?dec(rnd(2,9),1):dec(rnd(11,25),2),q=rnd(0,1)?Q(rnd(2,20)):dec(rnd(11,99),1);
+      return mkDec(`${decStr(qmul(q,d))} ÷ ${decStr(d)}`,q);}},
+  ]},
+  root:{name:'루트 √',group:'arith',ask:'계산하세요 (a√b 꼴로 간단히)',keys:['√','−'],hint:'예: 2√3 · √ 는 키보드 r 로도 입력 가능',levels:[
+    {crit:'근호 안이 같은 수끼리 덧셈·뺄셈',ex:'2√3 + 5√3,  7√2 − 4√2',gen(){
+      const n=pick([2,3,5,6,7,10,11]),op=pick(['+','−']);let a,b,c;
+      do{a=rnd(1,9);b=rnd(1,9);c=op==='+'?a+b:a-b}while(c===0);
+      return mkRad(`${radH(a,n)} ${op} ${radH(b,n)}`,c,n);}},
+    {crit:'근호끼리 곱셈·나눗셈 → 근호 안을 간단히',ex:'√2 × √8,  √45 ÷ √5,  2√3 × 3√6',gen(){
+      const t=rnd(0,2);
+      if(t===0){let a,b,k,m;do{a=rnd(2,15);b=rnd(2,15);[k,m]=simpRad(a*b)}while(k===1||isSq(a)||isSq(b));
+        return mkRad(`${sq(a)} × ${sq(b)}`,k,m);}
+      if(t===1){const b=pick([2,3,5,6,7]);let c;do{c=rnd(2,20)}while(isSq(c*b)||simpRad(c)[0]===1&&rnd(0,2)>0);
+        const [k,m]=simpRad(c);return mkRad(`${sq(b*c)} ÷ ${sq(b)}`,k,m);}
+      const SF=[2,3,5,6,7],a=pick(SF),b=pick(SF),[k,m]=simpRad(a*b);
+      const p=rnd(2,4),q=rnd(2,4);
+      return mkRad(`${radH(p,a)} × ${radH(q,b)}`,p*q*k,m);}},
+    {crit:'근호 안을 먼저 간단히 한 뒤 덧셈·뺄셈, 분모의 유리화',ex:'√12 + √27,  6/√3,  10/√5 − √20',gen(){
+      const b=pick([2,3,5,6,7]),t=rnd(0,2);
+      const rq=k=>k===1?sq(b):sq(k*k*b);
+      if(t===0){let p,q,c,op;do{p=rnd(1,5);q=rnd(1,5);op=pick(['+','−']);c=op==='+'?p+q:p-q}while(c===0||p<2&&q<2);
+        return mkRad(`${rq(p)} ${op} ${rq(q)}`,c,b);}
+      const m=rnd(1,6),fr=`<span class="fr"><span>${m*b}</span><span>${sq(b)}</span></span>`;
+      if(t===1) return mkRad(fr,m,b);
+      let p,c,op;do{p=rnd(1,4);op=pick(['+','−']);c=op==='+'?m+p:m-p}while(c===0);
+      return mkRad(`${fr} ${op} ${rq(p)}`,c,b);}},
+  ]},
+  cpx:{name:'허수 i',group:'arith',ask:'계산하세요 (a+bi 꼴)',keys:['i','−','+'],hint:'예: 3−2i, −i, 5',levels:[
+    {crit:'복소수의 덧셈·뺄셈 (실수부끼리, 허수부끼리)',ex:'(3 + 2i) + (1 − 4i)',gen(){
+      const a=nz(-9,9),b=nz(-9,9),c=nz(-9,9),d=nz(-9,9),op=pick(['+','−']);
+      return mkC(`(${cH(a,b)}) ${op} (${cH(c,d)})`,op==='+'?a+c:a-c,op==='+'?b+d:b-d);}},
+    {crit:'i² = −1 사용: i의 거듭제곱, (순허수) × (복소수)',ex:'i¹⁵,  2i(3 − 4i)',gen(){
+      if(rnd(0,1)){const n=rnd(2,40),t=[[1,0],[0,1],[-1,0],[0,-1]][n%4];
+        return mkC(`<i>i</i><sup>${n}</sup>`,t[0],t[1]);}
+      const k=nz(-4,4),a=nz(-6,6),b=nz(-6,6);
+      return mkC(`${coefH(k)}<i>i</i>(${cH(a,b)})`,-k*b,k*a);}},
+    {crit:'복소수끼리 곱셈 · 나눗셈 (켤레복소수로 분모 실수화)',ex:'(2 + 3i)(1 − i),  (5 + 5i) ÷ (1 + 2i)',gen(){
+      if(rnd(0,1)){const a=nz(-6,6),b=nz(-6,6),c=nz(-6,6),d=nz(-6,6);
+        return mkC(`(${cH(a,b)})(${cH(c,d)})`,a*c-b*d,a*d+b*c);}
+      const c=nz(-4,4),d=nz(-4,4);let p,q;do{p=rnd(-6,6);q=rnd(-6,6)}while(p===0&&q===0);
+      return mkC(`(${cH(p*c-q*d,p*d+q*c)}) ÷ (${cH(c,d)})`,p,q);}},
+  ]},
+  poly:{name:'1차 다항식 정리',group:'expr',ask:'간단히 하세요',keys:['x','−','+'],hint:'예: −2x+9',levels:[
+    {crit:'괄호 없음 — 동류항끼리 모으기만',ex:'3x + 5 − x + 2',gen(){
+      let t;do{t=[[nz(-9,9),1],[nz(-9,9),1],[nz(-9,9),0],[nz(-9,9),0]]}while(t[0][0]+t[1][0]===0);
+      const a=t[0][0]+t[1][0],b=t[2][0]+t[3][0];shuffle(t);
+      return mkLin(t.map((e,i)=>termH(e[0],e[1],i===0)).join(''),a,b);}},
+    {crit:'(양수) × 괄호 1개 — 분배법칙 + 동류항',ex:'2(x + 3) − 4x,  3(2x − 1) + 5',gen(){
+      let k,p,q,ex,a,b;
+      do{k=rnd(2,6);p=nz(-5,5);q=nz(-9,9);
+        ex=rnd(0,2)===0?[[nz(-9,9),1],[nz(-9,9),0]]:[[nz(-9,9),rnd(0,1)]];
+        a=k*p+ex.filter(e=>e[1]).reduce((s,e)=>s+e[0],0);
+        b=k*q+ex.filter(e=>!e[1]).reduce((s,e)=>s+e[0],0);}while(a===0);
+      let s;
+      if(rnd(0,1)) s=kpar(k,p,q)+ex.map(e=>termH(e[0],e[1],false)).join('');
+      else s=ex.map((e,i)=>termH(e[0],e[1],i===0)).join('')+' + '+kpar(k,p,q);
+      return mkLin(s,a,b);}},
+    {crit:'괄호 2개, 괄호 앞이 음수 — 뺄 때 괄호 안 부호가 모두 바뀜',ex:'3(2x − 1) − 2(x − 4),  −(x + 3) + 4(2x − 1)',gen(){
+      let k1,k2,p1,q1,p2,q2,a;
+      do{k1=nz(-6,6);k2=rnd(1,6);p1=nz(-5,5);q1=nz(-9,9);p2=nz(-5,5);q2=nz(-9,9);a=k1*p1-k2*p2}while(a===0);
+      if(k1>0&&rnd(0,1)){ // 음수 괄호를 앞에 두는 형태
+        return mkLin(`${kpar(-k2,p2,q2)} + ${kpar(k1,p1,q1)}`,a,k1*q1-k2*q2);}
+      return mkLin(`${kpar(k1,p1,q1)} − ${k2===1?'':k2}(${linH(p2,q2)})`,a,k1*q1-k2*q2);}},
+  ]},
+  eq:{name:'1차 방정식',group:'expr',ask:'x 의 값을 구하세요',keys:['x','=','−','/'],hint:'예: 3  또는  x=3',levels:[
+    {crit:'한 변이 0 — ax + b = 0',ex:'3x − 6 = 0',gen(){
+      const a=nz(-9,9),x=nz(-9,9),b=-a*x,l=linH(a,b);
+      return mkEq(rnd(0,4)?`${l} = 0`:`0 = ${l}`,x);}},
+    {crit:'양변이 모두 0이 아님, 양변에 x — ax + b = cx + d (이항)',ex:'5x + 3 = 2x − 9',gen(){
+      let a,c,b,d,x;do{a=nz(-9,9);c=nz(-9,9);x=rnd(-9,9);b=nz(-15,15);d=(a-c)*x+b}while(a===c||d===0);
+      return mkEq(`${linH(a,b)} = ${linH(c,d)}`,x);}},
+    {crit:'괄호가 있는 양변 — 분배법칙 → 이항 → 정리',ex:'3(x − 2) = 2(x + 1) + 4',gen(){
+      let k1,k2,p1,q1,p2,q2,x,e;
+      do{k1=nz(-5,5);k2=nz(-5,5);p1=rnd(1,3);p2=rnd(1,3);q1=nz(-6,6);q2=nz(-6,6);x=rnd(-9,9);
+        e=k1*(p1*x+q1)-k2*(p2*x+q2);}
+      while(k1*p1===k2*p2||Math.abs(k1)<2||Math.abs(e)>40);
+      const r=kpar(k2,p2,q2)+(e===0?'':(e<0?' − ':' + ')+Math.abs(e));
+      return mkEq(`${kpar(k1,p1,q1)} = ${r}`,x);}},
+  ]},
+  abs:{name:'절댓값 | |',group:'arith',ask:'계산하세요',keys:['−','.'],hint:'정수 또는 소수로 입력',levels:[
+    {crit:'절댓값 기호 1개, 안에는 수 하나',ex:'|−7|,  |3.5|,  |−12|',gen(){
+      const v=absVal();return mkNum(ab(qH(v)),Q(Math.abs(v.n),v.d));}},
+    {crit:'절댓값 안에서 먼저 계산 / 절댓값끼리 더하고 빼기',ex:'|3 − 8|,  |−4| + |−6|,  |−9| − |5|',gen(){
+      const a=nz(-15,15),b=nz(-15,15),A=Math.abs;
+      switch(rnd(0,3)){
+        case 0:return mkQ(ab(`${num(a)} − ${par(b)}`),Q(A(a-b)));
+        case 1:return mkQ(ab(`${num(a)} + ${par(b)}`),Q(A(a+b)));
+        case 2:return mkQ(`${ab(num(a))} + ${ab(num(b))}`,Q(A(a)+A(b)));
+        default:return mkQ(`${ab(num(a))} − ${ab(num(b))}`,Q(A(a)-A(b)));
+      }}},
+    {crit:'절댓값 바깥의 부호 −|…| · 중첩된 절댓값 ||…|…|',ex:'−|−5| + |2 − 7|,  ||3 − 8| − 9|',gen(){
+      const a=nz(-12,12),b=nz(-12,12),c=nz(-12,12),d=nz(-12,12),A=Math.abs;
+      switch(rnd(0,3)){
+        case 0:return mkQ(`${M}${ab(num(a))} + ${ab(`${num(b)} − ${par(c)}`)}`,Q(-A(a)+A(b-c)));
+        case 1:return mkQ(ab(`${ab(`${num(a)} − ${par(b)}`)} − ${A(c)}`),Q(A(A(a-b)-A(c))));
+        case 2:return mkQ(`${ab(`${num(a)} − ${par(b)}`)} − ${ab(`${num(c)} + ${par(d)}`)}`,Q(A(a-b)-A(c+d)));
+        default:{const k=nz(-4,4);return mkQ(`${coefH(k)}${ab(`${num(a)} + ${par(b)}`)} + ${par(c)}`,Q(k*A(a+b)+c));}
+      }}},
+  ]},
+  area:{name:'도형의 넓이',group:'geo',ask:'넓이를 구하세요 (단위 cm²)',keys:[],hint:'숫자만 입력 (cm² 는 빼도 돼요)',levels:[
+    {crit:'직사각형·정사각형·직각삼각형 — 주어진 두 변으로 공식 1번',ex:'가로 × 세로,  (밑변 × 높이) ÷ 2',gen(){
+      const t=rnd(0,2);
+      if(t===0){let W,H;do{W=rnd(3,15);H=rnd(2,12)}while(W===H);const {s,x0,y0}=fit(W,H),w=W*s,h=H*s,c=[x0+w/2,y0+h/2];
+        return mkArea(fig(P([[x0,y0],[x0+w,y0],[x0+w,y0+h],[x0,y0+h]])+RA(x0,y0+h,1,-1)
+          +DIM([x0,y0+h],[x0+w,y0+h],cm(W),c)+DIM([x0+w,y0],[x0+w,y0+h],cm(H),c),'직사각형'),W*H,[2*(W+H),W*H/2]);}
+      if(t===1){const a=rnd(2,15),{s,x0,y0}=fit(a,a),w=a*s,c=[x0+w/2,y0+w/2];
+        return mkArea(fig(P([[x0,y0],[x0+w,y0],[x0+w,y0+w],[x0,y0+w]])+RA(x0,y0+w,1,-1)+DIM([x0,y0+w],[x0+w,y0+w],cm(a),c),'정사각형'),a*a,[4*a,2*a]);}
+      let W,H;do{W=rnd(3,16);H=rnd(3,12)}while(W*H%2);const {s,x0,y0}=fit(W,H),w=W*s,h=H*s,c=[x0+w/3,y0+h*2/3];
+      return mkArea(fig(P([[x0,y0],[x0,y0+h],[x0+w,y0+h]])+RA(x0,y0+h,1,-1)
+        +DIM([x0,y0+h],[x0+w,y0+h],cm(W),c)+DIM([x0,y0],[x0,y0+h],cm(H),c),'직각삼각형'),W*H/2,[W*H]);}},
+    {crit:'평행사변형·삼각형·사다리꼴 — 높이(점선)를 골라 쓰기, 필요 없는 빗변 길이도 주어짐',ex:'밑변 × 높이,  (윗변 + 아랫변) × 높이 ÷ 2',gen(){
+      const t=rnd(0,2);
+      if(t===0){const [o,H,L]=pick(TRIP),B=rnd(o+2,o+10),{s,x0,y0}=fit(B+o,H),h=H*s,xo=x0+o*s,c=[x0+(B+o)*s/2,y0+h/2];
+        return mkArea(fig(P([[xo,y0],[xo+B*s,y0],[x0+B*s,y0+h],[x0,y0+h]])+D(xo,y0,xo,y0+h)+RA(xo,y0+h,1,-1)
+          +DIM([x0,y0+h],[x0+B*s,y0+h],cm(B),c)+DIM([x0,y0+h],[xo,y0],cm(L),c)+T(xo+6,y0+h/2,cm(H),'start'),'평행사변형'),B*H,[B*L,B*H/2,2*(B+L)]);}
+      if(t===1){let o,H,L,B;do{[o,H,L]=pick(TRIP);B=rnd(o+2,o+12)}while(B*H%2);
+        const {s,x0,y0}=fit(B,H),h=H*s,xo=x0+o*s,c=[(x0+x0+B*s+xo)/3,y0+h*2/3];
+        return mkArea(fig(P([[x0,y0+h],[x0+B*s,y0+h],[xo,y0]])+D(xo,y0,xo,y0+h)+RA(xo,y0+h,1,-1)
+          +DIM([x0,y0+h],[x0+B*s,y0+h],cm(B),c)+DIM([x0,y0+h],[xo,y0],cm(L),c)+T(xo+6,y0+h/2+14,cm(H),'start'),'삼각형'),B*H/2,[B*H,B*L/2]);}
+      let A,Bb,H,o;do{H=rnd(3,10);o=rnd(1,4);A=rnd(3,10);Bb=A+o+rnd(1,5)}while((A+Bb)*H%2);
+      const {s,x0,y0}=fit(Bb,H),h=H*s,xo=x0+o*s,c=[x0+Bb*s/2,y0+h/2];
+      return mkArea(fig(P([[xo,y0],[xo+A*s,y0],[x0+Bb*s,y0+h],[x0,y0+h]])+D(xo,y0,xo,y0+h)+RA(xo,y0+h,1,-1)
+        +DIM([xo,y0],[xo+A*s,y0],cm(A),c)+DIM([x0,y0+h],[x0+Bb*s,y0+h],cm(Bb),c)+T(xo+6,y0+h/2,cm(H),'start'),'사다리꼴'),(A+Bb)*H/2,[(A+Bb)*H,A*Bb,Bb*H]);}},
+    {crit:'여러 도형을 합치거나 빼서 구하기 — ㄱ자, 집 모양, 액자 모양',ex:'큰 직사각형 − 작은 직사각형,  직사각형 + 삼각형',gen(){
+      const t=rnd(0,2);
+      if(t===0){const W=rnd(8,16),H=rnd(6,12),w=rnd(2,W-3),h=rnd(2,H-3),{s,x0,y0}=fit(W,H),X=v=>x0+v*s,Y=v=>y0+v*s,c=[X(W/2),Y(H/2)];
+        return mkArea(fig(P([[X(0),Y(0)],[X(W-w),Y(0)],[X(W-w),Y(h)],[X(W),Y(h)],[X(W),Y(H)],[X(0),Y(H)]])+RA(X(0),Y(H),1,-1)
+          +DIM([X(0),Y(H)],[X(W),Y(H)],cm(W),c)+DIM([X(0),Y(0)],[X(0),Y(H)],cm(H),c)
+          +DIM([X(0),Y(0)],[X(W-w),Y(0)],cm(W-w),c)+DIM([X(W),Y(h)],[X(W),Y(H)],cm(H-h),c),'ㄱ자 모양 도형'),
+          W*H-w*h,[W*H,(W-w)*(H-h),W*H+w*h]);}
+      if(t===1){let W,H,R;do{W=rnd(6,14);H=rnd(4,9);R=rnd(2,6)}while(W*R%2);
+        const {s,x0,y0}=fit(W,H+R),X=v=>x0+v*s,Y=v=>y0+v*s,c=[X(W/2),Y(R+H/2)];
+        return mkArea(fig(P([[X(0),Y(R)],[X(W/2),Y(0)],[X(W),Y(R)],[X(W),Y(H+R)],[X(0),Y(H+R)]])+D(X(0),Y(R),X(W),Y(R))+D(X(W/2),Y(0),X(W/2),Y(R))+RA(X(W/2),Y(R),1,-1,8)
+          +DIM([X(0),Y(H+R)],[X(W),Y(H+R)],cm(W),c)+DIM([X(W),Y(R)],[X(W),Y(H+R)],cm(H),c)+T(X(W/2)+6,Y(R/2)+2,cm(R),'start'),'집 모양 도형 (직사각형 + 삼각형)'),
+          W*H+W*R/2,[W*H+W*R,W*(H+R),W*H]);}
+      const W=rnd(9,16),H=rnd(7,12),w=rnd(2,W-5),h=rnd(2,H-5),{s,x0,y0}=fit(W,H),X=v=>x0+v*s,Y=v=>y0+v*s,ix=(W-w)/2,iy=(H-h)/2,c=[X(W/2),Y(H/2)];
+      return mkArea(fig(`<path class="shape" fill-rule="evenodd" d="M${X(0)} ${Y(0)}H${X(W)}V${Y(H)}H${X(0)}Z M${X(ix)} ${Y(iy)}H${X(ix+w)}V${Y(iy+h)}H${X(ix)}Z"/>`
+        +DIM([X(0),Y(H)],[X(W),Y(H)],cm(W),c)+DIM([X(W),Y(0)],[X(W),Y(H)],cm(H),c)
+        +`<g class="sm">${DIM([X(ix),Y(iy+h)],[X(ix+w),Y(iy+h)],cm(w),c,8)+DIM([X(ix+w),Y(iy)],[X(ix+w),Y(iy+h)],cm(h),c,8)}</g>`,'색칠한 부분 (액자 모양)'),
+        W*H-w*h,[W*H,w*h,W*H+w*h]);}},
+  ]},
+};
+function makeSet(cat,lv,count){
+  const out=[],seen=new Set();let tries=0;
+  while(out.length<count&&tries<count*60){tries++;
+    const p=CATS[cat].levels[lv].gen();if(seen.has(p.q))continue;seen.add(p.q);out.push(p);}
+  while(out.length<count) out.push(CATS[cat].levels[lv].gen());
+  return out;
+}
+// ==LOGIC END==
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+const LV=['하','중','상'];
+const META={
+  int:{ic:'±',d:'음수·혼합 계산'},frac:{ic:'½',d:'통분·역수'},dec:{ic:'.5',d:'소수점 이동'},
+  root:{ic:'√',d:'근호 간단히·유리화'},cpx:{ic:'<i>i</i>',d:'i² = −1'},
+  poly:{ic:'<i>x</i>',d:'동류항·분배법칙'},eq:{ic:'=',d:'이항해서 x 구하기'},
+  abs:{ic:'|a|',d:'부호 떼기·중첩'},area:{ic:'▱',d:'그림 보고 넓이 구하기'}
+};
+const sel={cat:'int',lv:0,count:10,mode:'input'};
+const MODES={input:['✎','주관식','답을 직접 입력해서 풀기','주관식'],choice:['④','객관식 4지선다','보기 4개 중 정답 고르기','객관식'],
+  mix:['⇄','섞어서','주관식·객관식이 무작위로 섞여 나옴','혼합']};
+const tagTxt=()=>`${CATS[sel.cat].name} · ${LV[sel.lv]} · ${MODES[sel.mode][3]}`;
+const curMode=()=>S.modes[S.i];
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let S=null;
+
+function renderHome(){
+  for(const [g,el] of [['arith','cats-arith'],['expr','cats-expr'],['geo','cats-geo']]){
+    $(el).innerHTML=Object.entries(CATS).filter(([,c])=>c.group===g)
+      .map(([k,c])=>`<button class="cat${sel.cat===k?' on':''}" data-cat="${k}"><div class="ic">${META[k].ic}</div><b>${c.name}</b><small>${META[k].d}</small></button>`).join('');
+  }
+  $('lvCatName').textContent=CATS[sel.cat].name;
+  $('levels').innerHTML=CATS[sel.cat].levels.map((l,i)=>
+    `<button class="lv${sel.lv===i?' on':''}" data-lv="${i}"><span class="check">✓</span><span class="lv-badge l${i}">${LV[i]}</span><div class="crit">${l.crit}</div><div class="ex">예) ${l.ex}</div></button>`).join('');
+  $('counts').innerHTML=[10,20,30,50].map(n=>`<button class="${sel.count===n?'on':''}" data-n="${n}">${n}문제</button>`).join('');
+  $('modes').innerHTML=Object.entries(MODES).map(([k,[ic,n,d]])=>`<button class="cat${sel.mode===k?' on':''}" data-mode="${k}"><div class="ic">${ic}</div><b>${n}</b><small>${d}</small></button>`).join('');
+  $('sumTxt').textContent=`${tagTxt()} · ${sel.count}문제`;
+}
+function renderTable(){
+  const colors=['var(--lv1)','var(--lv2)','var(--lv3)'];
+  $('levels-sec').querySelector('.container').innerHTML=`
+    <div class="sec-head"><div class="kicker">LEVELS</div><h2>난이도는 '무엇이 추가되느냐'로 나눕니다</h2>
+    <p>하 → 중 → 상으로 갈수록 새로운 개념이 하나씩 더해집니다. 행을 누르면 그 항목으로 바로 설정돼요.</p></div>
+    <div class="table-wrap"><table><thead><tr><th>항목</th>${LV.map((l,i)=>`<th><span class="dot" style="background:${colors[i]}"></span>${l}</th>`).join('')}</tr></thead><tbody>
+    ${Object.entries(CATS).map(([k,c])=>`<tr><td class="name">${c.name}</td>${c.levels.map((l,i)=>`<td><a href="#practice" data-cat="${k}" data-lv="${i}">${l.crit}<span class="ex">${l.ex}</span></a></td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-cat],[data-lv],[data-n],[data-mode]');if(!t)return;
+  if(t.dataset.mode){sel.mode=t.dataset.mode}
+  if(t.dataset.cat&&t.dataset.cat!==sel.cat){sel.cat=t.dataset.cat;if(!t.dataset.lv)sel.lv=0}
+  if(t.dataset.lv){sel.lv=+t.dataset.lv}
+  if(t.dataset.n){sel.count=+t.dataset.n}
+  renderHome();
+});
+
+// 히어로 미리보기: 실제 생성기로 문제를 돌려 보여줌
+let pvTimer=null;
+function cyclePreview(){
+  const keys=Object.keys(CATS),k=pick(keys),i=rnd(0,2);
+  const el=$('pvQ');el.style.opacity=0;
+  setTimeout(()=>{el.innerHTML=CATS[k].levels[i].gen().q;$('pvTag').textContent=`${CATS[k].name} · ${LV[i]}`;el.style.opacity=1},300);
+}
+
+function show(id){
+  for(const s of ['home','quiz','result'])$(s).classList.toggle('hidden',s!==id);
+  $('navCta').classList.toggle('hidden',id!=='home');
+  document.querySelector('.nav-links').classList.toggle('hidden',id!=='home');
+  window.scrollTo(0,0);
+}
+const fmtT=ms=>{const s=Math.round(ms/1000);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+
+function startQuiz(list){
+  const c=CATS[sel.cat];
+  if(S)clearInterval(S.timer);
+  S={list,i:0,ok:0,log:[],t0:Date.now(),phase:'answer',timer:null,
+     modes:list.map(()=>sel.mode==='mix'?(rnd(0,1)?'choice':'input'):sel.mode)};
+  $('qTag').textContent=tagTxt();
+  $('qAsk').textContent=c.ask;
+  $('qHint').textContent=c.hint;
+  $('qKeys').innerHTML=c.keys.map(k=>`<button class="key" data-key="${k}">${k}</button>`).join('')+`<button class="key" data-key="⌫">⌫</button>`;
+  S.timer=setInterval(()=>{$('qTime').textContent=fmtT(Date.now()-S.t0)},500);
+  $('qTime').textContent='0:00';
+  show('quiz');renderQ();
+}
+function renderQ(){
+  const p=S.list[S.i];
+  $('qNo').textContent=`문제 ${S.i+1}`;
+  $('qText').innerHTML=p.q;
+  $('qStat').textContent=`${S.i+1} / ${S.list.length} · 정답 ${S.ok}`;
+  $('qProg').style.width=(S.i/S.list.length*100)+'%';
+  $('qCard').className='q-card';$('qFb').className='fb';$('qFb').innerHTML='';
+  $('qIn').value='';$('qIn').disabled=false;$('okBtn').textContent='확인';
+  S.phase='answer';
+  const isC=curMode()==='choice';
+  $('qChoiceArea').classList.toggle('hidden',!isC);
+  $('qInputArea').classList.toggle('hidden',isC);
+  $('qAsk').textContent=isC?'알맞은 답을 고르세요':CATS[sel.cat].ask;
+  if(isC){
+    $('qChoices').innerHTML=makeChoices(p).map((o,j)=>`<button class="choice" data-c="${j}"><span class="cn">${j+1}</span><span class="cv">${o.h}</span></button>`).join('');
+    document.activeElement?.blur();
+  }else $('qIn').focus();
+}
+// 채점 결과 반영 (주관식·객관식 공통) → 기록 남기고 잠깐 표시한 뒤 자동으로 다음 문제
+// mine: 입력 원문 또는 객관식 보기 HTML, pick: 고른 보기 번호(객관식)
+function judge(good,p,mine,mineHtml,pick){
+  S.phase='feedback';
+  S.log.push({p,mine,mineHtml,good,mode:curMode(),pick});
+  if(good){S.ok++;$('qCard').className='q-card ok';$('qFb').className='fb ok';$('qFb').textContent='✓ 정답!'}
+  else{$('qCard').className='q-card bad';$('qFb').className='fb bad';$('qFb').innerHTML=`✗ 정답: <span class="answer">${p.ans}</span>`}
+  $('qStat').textContent=`${S.i+1} / ${S.list.length} · 정답 ${S.ok}`;
+  setTimeout(()=>{if(S&&S.phase==='feedback'&&S.list[S.i]===p)next()},good?600:900);
+}
+function submit(skip){
+  if(S.phase==='feedback')return;
+  if(curMode()==='choice'){if(skip)choose(-1);return}
+  const raw=$('qIn').value.trim();
+  if(!skip&&!raw){$('qIn').focus();return}
+  const p=S.list[S.i];
+  $('qIn').disabled=true;
+  judge(!skip&&p.check(norm(raw)),p,skip?'(건너뜀)':raw,false);
+}
+function choose(i){
+  if(S.phase==='feedback')return;
+  const p=S.list[S.i],ch=p.choices;
+  [...$('qChoices').children].forEach((b,j)=>{b.disabled=true;
+    b.classList.add(ch[j].t===p.text?'right':j===i?'picked':'dim')});
+  judge(i>=0&&ch[i].t===p.text,p,i>=0?ch[i].h:'(건너뜀)',i>=0,i);
+}
+$('qChoices').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b&&!b.disabled)choose(+b.dataset.c)});
+document.addEventListener('keydown',e=>{
+  if(!S||curMode()!=='choice'||S.phase!=='answer'||$('quiz').classList.contains('hidden'))return;
+  if(/^[1-4]$/.test(e.key)){e.preventDefault();choose(+e.key-1)}
+});
+function next(){S.i++;if(S.i>=S.list.length)finish();else renderQ()}
+function finish(){
+  clearInterval(S.timer);
+  const n=Math.max(S.log.length,1),ms=Date.now()-S.t0,rate=Math.round(S.ok/n*100);
+  $('rTag').textContent=tagTxt();
+  $('rScore').textContent=`${S.ok} / ${n}`;
+  $('rMsg').textContent=rate===100?'완벽해요! 다음 난이도에 도전해 보세요 🎉':rate>=80?'아주 좋아요! 틀린 문제만 한 번 더 볼까요?':rate>=50?'괜찮아요. 틀린 유형을 다시 연습해 보세요.':'천천히, 한 단계 쉬운 난이도부터 다져 보세요.';
+  $('rRate').textContent=rate+'%';
+  $('rTime').textContent=fmtT(ms);
+  $('rAvg').textContent=(ms/1000/n).toFixed(1)+'초';
+  const bad=S.log.filter(l=>!l.good).length;
+  $('rvCount').innerHTML=`전체 ${S.log.length} · 맞힘 <b style="color:var(--ok)">${S.ok}</b> · 틀림 <b style="color:var(--bad)">${bad}</b>`;
+  renderReview('all');
+  $('retryWrongBtn').classList.toggle('hidden',!bad);
+  show('result');
+}
+// 풀이 기록: 모든 문제 · 내 답 · 정답 (객관식은 보기 4개와 내가 고른 것까지)
+function renderReview(f){
+  [...$('rvFilter').children].forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  const rows=S.log.map((l,i)=>({...l,no:i+1})).filter(l=>f==='all'||(f==='ok')===l.good);
+  $('rList').innerHTML=rows.length?rows.map(l=>{
+    const mine=l.mine==='(건너뜀)'?'<span class="muted">건너뜀</span>':l.mineHtml?l.mine:esc(l.mine);
+    const opts=l.mode==='choice'?`<div class="rv-opts">${l.p.choices.map((o,j)=>
+      `<span class="rv-opt${o.t===l.p.text?' right':j===l.pick?' picked':''}"><em>${j+1}</em>${o.h}</span>`).join('')}</div>`:'';
+    return `<div class="rv ${l.good?'ok':'bad'}">
+      <div class="rv-side"><span class="rv-no">${l.no}</span><span class="rv-mark">${l.good?'O':'X'}</span></div>
+      <div class="rv-body">
+        <div class="rv-top"><span class="mtag">${l.mode==='choice'?'객관식':'주관식'}</span></div>
+        <div class="rv-q">${l.p.q}</div>
+        ${opts}
+        <div class="rv-ans"><span>내 답 <b class="${l.good?'g':'r'}">${mine}</b></span>${l.good?'':`<span>정답 <b class="g">${l.p.ans}</b></span>`}</div>
+      </div></div>`}).join(''):'<p class="muted" style="text-align:center;padding:24px 0">해당하는 문제가 없어요.</p>';
+}
+$('rvFilter').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b)renderReview(b.dataset.f)});
+$('qKeys').addEventListener('click',e=>{
+  const k=e.target.closest('[data-key]')?.dataset.key;if(!k||S.phase!=='answer')return;
+  const inp=$('qIn'),a=inp.selectionStart??inp.value.length,b=inp.selectionEnd??a;
+  if(k==='⌫'){const st=a===b?Math.max(0,a-1):a;inp.value=inp.value.slice(0,st)+inp.value.slice(b);inp.setSelectionRange(st,st)}
+  else{const ch=k==='−'?'-':k;inp.value=inp.value.slice(0,a)+ch+inp.value.slice(b);inp.setSelectionRange(a+ch.length,a+ch.length)}
+  inp.focus();
+});
+$('qIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submit(false)}});
+$('okBtn').addEventListener('click',()=>submit(false));
+$('skipBtn').addEventListener('click',()=>{if(S.phase==='answer')submit(true)});
+$('quitBtn').addEventListener('click',()=>{if(S.i===0&&S.phase==='answer'){clearInterval(S.timer);goHome();return}
+  if(S.phase==='feedback')S.i++;S.list=S.list.slice(0,Math.max(S.i,1));finish()});
+const begin=()=>startQuiz(makeSet(sel.cat,sel.lv,sel.count));
+function goHome(){show('home');renderHome();document.getElementById('practice').scrollIntoView()}
+$('startBtn').addEventListener('click',begin);
+$('navCta').addEventListener('click',begin);
+$('againBtn').addEventListener('click',begin);
+$('retryWrongBtn').addEventListener('click',()=>startQuiz(shuffle(S.log.filter(l=>!l.good).map(l=>l.p))));
+$('homeBtn').addEventListener('click',goHome);
+$('logo').addEventListener('click',()=>{if(S)clearInterval(S.timer);show('home')});
+renderHome();renderTable();cyclePreview();setInterval(()=>{if(!$('home').classList.contains('hidden'))cyclePreview()},2800);
+</script>
+</body>
+</html>
