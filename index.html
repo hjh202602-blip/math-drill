@@ -86,7 +86,10 @@ button{font-family:inherit}
 
 /* ---------- 섹션 ---------- */
 section.block{padding:64px 0;border-top:1px solid var(--line)}
-section.block.alt{background:var(--bg2)}
+section.block.alt{background:color-mix(in srgb,var(--bg2) 72%,transparent)}
+/* 배경에 흐르는 수학 기호 레이어: 내용 뒤, 클릭 통과 */
+#bgMath{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+main{position:relative;z-index:1}
 .sec-head{margin-bottom:32px}
 .sec-head .kicker{color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:.04em}
 .sec-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);margin:6px 0 8px;letter-spacing:-.03em;font-weight:900;line-height:1.25}
@@ -257,6 +260,7 @@ footer .container{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 </style>
 </head>
 <body>
+<canvas id="bgMath" aria-hidden="true"></canvas>
 
 <header class="nav">
   <div class="container">
@@ -951,6 +955,75 @@ $('againBtn').addEventListener('click',begin);
 $('retryWrongBtn').addEventListener('click',()=>startQuiz(shuffle(S.log.filter(l=>!l.good).map(l=>l.p))));
 $('homeBtn').addEventListener('click',goHome);
 $('logo').addEventListener('click',()=>{if(S)clearInterval(S.timer);show('home')});
+/* ---------- 배경: 수식·기호·그래프가 오른쪽 위로 천천히 흐름 ---------- */
+(function(){
+  const cv=$('bgMath'),ctx=cv.getContext('2d');
+  const TXT=['π','∑','∫','√2','∞','θ','Δ','x²','a² + b² = c²','y = 2x + 1','e^(iπ) + 1 = 0','i² = −1','3.14159','½','7 × 8 = 56','sin θ',
+    'log₂ 8 = 3','f(x)','≠','≤','÷','±','|−5| = 5','(a + b)²','90°','√16 = 4','2ⁿ','x = −b / 2a','0.25','12 ÷ 4 = 3','∠A','dy/dx','n!','∈','3x − 6 = 0','⅔','√3'];
+  const GR=['sine','parab','line','circle','tri','bars','scatter'];
+  const DX=Math.cos(-0.32),DY=Math.sin(-0.32);   // 흐르는 방향: 오른쪽 약간 위
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  let W=0,H=0,items=[],ink='#000',acc='#00f',alpha=.08,last=0;
+
+  function readColors(){
+    const cs=getComputedStyle(document.documentElement);
+    ink=cs.getPropertyValue('--ink').trim()||'#000';acc=cs.getPropertyValue('--accent').trim()||'#00f';
+    const bg=cs.getPropertyValue('--bg').trim(),m=bg.match(/^#(..)(..)(..)$/);
+    const lum=m?(parseInt(m[1],16)+parseInt(m[2],16)+parseInt(m[3],16))/765:1;
+    alpha=lum<.5?.11:.085;
+  }
+  function make(spawnEdge){
+    const g=Math.random()<.22,size=g?rnd(46,90):rnd(14,34);
+    const it={g,v:g?pick(GR):pick(TXT),size,speed:8+size*.35+Math.random()*6,rot:(Math.random()-.5)*.3,
+      a:alpha*(.6+Math.random()*.6),col:Math.random()<.3?'acc':'ink',x:Math.random()*W,y:Math.random()*H};
+    if(spawnEdge){ // 화면 왼쪽 또는 아래쪽 밖에서 다시 등장
+      if(Math.random()<W/(W+H)){it.x=Math.random()*W*1.1-W*.1;it.y=H+it.size}else{it.x=-it.size*3;it.y=Math.random()*H*1.1}
+    }
+    return it;
+  }
+  function resize(){
+    const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
+    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.min(70,Math.round(W*H/16000));
+    while(items.length<n)items.push(make(false));items.length=n;
+    if(reduce.matches)draw();
+  }
+  function graph(t,s){
+    ctx.beginPath();
+    const h=s/2,ax=()=>{ctx.moveTo(-h,0);ctx.lineTo(h,0);ctx.moveTo(-h*.8,-h);ctx.lineTo(-h*.8,h)};
+    switch(t){
+      case 'sine':ax();ctx.moveTo(-h,0);for(let x=-h;x<=h;x+=2)ctx.lineTo(x,-Math.sin(x/h*Math.PI*1.5)*h*.6);break;
+      case 'parab':ax();ctx.moveTo(-h*.7,-h);for(let x=-h*.7;x<=h*.7;x+=2)ctx.lineTo(x,h*.7-(x/(h*.7))**2*h*1.5);break;
+      case 'line':ax();ctx.moveTo(-h,h*.7);ctx.lineTo(h,-h*.8);break;
+      case 'circle':ctx.arc(0,0,h*.8,0,Math.PI*2);ctx.moveTo(0,0);ctx.lineTo(h*.8,0);break;
+      case 'tri':ctx.moveTo(-h,h*.6);ctx.lineTo(h,h*.6);ctx.lineTo(-h,-h*.7);ctx.closePath();ctx.rect(-h,h*.6-8,8,8);break;
+      case 'bars':ctx.moveTo(-h,h);ctx.lineTo(h,h);[.4,.8,.55,1].forEach((v,i)=>ctx.rect(-h+6+i*(s-12)/4,h-v*s*.9,(s-12)/4-6,v*s*.9));break;
+      default:ax();[[-.5,.4],[-.2,.1],[.1,-.1],[.35,-.35],[.6,-.5]].forEach(([x,y])=>{ctx.moveTo(x*h+2.5,y*h);ctx.arc(x*h,y*h,2.5,0,Math.PI*2)});
+    }
+    ctx.stroke();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);ctx.lineWidth=1.4;ctx.lineJoin='round';ctx.textAlign='center';ctx.textBaseline='middle';
+    for(const it of items){
+      const c=it.col==='acc'?acc:ink;ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rot);ctx.globalAlpha=it.a;
+      if(it.g){ctx.strokeStyle=c;graph(it.v,it.size)}
+      else{ctx.fillStyle=c;ctx.font=`${it.size}px "Noto Serif","Times New Roman",serif`;ctx.fillText(it.v,0,0)}
+      ctx.restore();
+    }
+  }
+  function tick(t){
+    const dt=Math.min(.05,(t-last)/1000||0);last=t;
+    for(let i=0;i<items.length;i++){const it=items[i];it.x+=DX*it.speed*dt;it.y+=DY*it.speed*dt;
+      if(it.x-it.size*3>W||it.y+it.size<-it.size)items[i]=make(true);}
+    draw();if(!reduce.matches)requestAnimationFrame(tick);
+  }
+  readColors();resize();
+  addEventListener('resize',resize);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();items.forEach(it=>it.a=alpha*(.6+Math.random()*.6))});
+  reduce.addEventListener('change',()=>{if(!reduce.matches)requestAnimationFrame(tick)});
+  if(reduce.matches)draw();else requestAnimationFrame(tick);
+})();
+
 renderHome();renderTable();cyclePreview();setInterval(()=>{if(!$('home').classList.contains('hidden'))cyclePreview()},2800);
 </script>
 </body>
